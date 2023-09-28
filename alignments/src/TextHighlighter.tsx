@@ -175,7 +175,7 @@ interface Alignment {
   'English phrase': Phrase;
   'Hebrew phrase': Phrase;
   'Target phrase': Phrase;
-  'Pseudo-English phrase': string;
+  'Pseudo-English phrase'?: string;
 }
 
 interface Phrase {
@@ -185,7 +185,7 @@ interface Phrase {
 
 const TextHighlighter: React.FC = () => {
   const [data, setData] = useState<VerseData[]>([]);
-  const [activePhrase, setActivePhrase] = useState<string>('');
+  const [activePhrase, setActivePhrase] = useState<Alignment | null>();
 
   useEffect(() => {
     fetch('/data.jsonl')
@@ -197,8 +197,8 @@ const TextHighlighter: React.FC = () => {
       });
   }, []);
 
-  const handlePhraseHover = (phrase: string) => {
-    setActivePhrase(phrase);
+  const handlePhraseHover = (alignment: Alignment | null) => {
+    setActivePhrase(alignment);
   };
 
   return (
@@ -206,18 +206,11 @@ const TextHighlighter: React.FC = () => {
       {data.map((item, index) => (
         <div key={index} className="text-block">
           <div className="english">
-            {item.alignment.map((alignment: any, aIdx: number) => (
+            {item.alignment.map((alignment: Alignment, aIdx: number) => (
               <span
                 key={aIdx}
-                onMouseEnter={() => {
-                  handlePhraseHover(
-                    alignment['English phrase']['original-text-value'],
-                  );
-                  handlePhraseHover(alignment['bsb']['original-text-value']);
-                  handlePhraseHover(alignment['macula']['original-text-value']);
-                  handlePhraseHover(alignment['target']['original-text-value']);
-                }}
-                onMouseLeave={() => handlePhraseHover('')}
+                onMouseEnter={() => handlePhraseHover(alignment)}
+                onMouseLeave={() => handlePhraseHover(null)}
               >
                 {alignment['English phrase']['original-text-value']}
               </span>
@@ -226,7 +219,11 @@ const TextHighlighter: React.FC = () => {
           <div className="bsb">
             <Highlighter
               highlightClassName="highlight"
-              searchWords={[activePhrase]}
+              searchWords={[
+                activePhrase?.['English phrase']?.['original-text-value'] || '',
+                activePhrase?.['Hebrew phrase']?.['original-text-value'] || '',
+                activePhrase?.['Target phrase']?.['original-text-value'] || '',
+              ]}
               autoEscape={true}
               textToHighlight={item.bsb.content}
             />
@@ -234,7 +231,11 @@ const TextHighlighter: React.FC = () => {
           <div className="macula">
             <Highlighter
               highlightClassName="highlight"
-              searchWords={[activePhrase]}
+              searchWords={[
+                activePhrase?.['English phrase']?.['original-text-value'] || '',
+                activePhrase?.['Hebrew phrase']?.['original-text-value'] || '',
+                activePhrase?.['Target phrase']?.['original-text-value'] || '',
+              ]}
               autoEscape={true}
               textToHighlight={item.macula.content}
             />
@@ -242,7 +243,11 @@ const TextHighlighter: React.FC = () => {
           <div className="target">
             <Highlighter
               highlightClassName="highlight"
-              searchWords={[activePhrase]}
+              searchWords={[
+                activePhrase?.['English phrase']?.['original-text-value'] || '',
+                activePhrase?.['Hebrew phrase']?.['original-text-value'] || '',
+                activePhrase?.['Target phrase']?.['original-text-value'] || '',
+              ]}
               autoEscape={true}
               textToHighlight={item.target.content}
             />
