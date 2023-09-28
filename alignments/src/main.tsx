@@ -6,7 +6,7 @@ import './TextHighlighter.css';
 import './index.css';
 
 const App: React.FC = () => (
-  <div className="App">
+  <div className="App p-4">
     <TextHighlighter />
   </div>
 );

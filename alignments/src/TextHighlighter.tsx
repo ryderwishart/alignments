@@ -1,4 +1,5 @@
 import './TextHighlighter.css';
+import './index.css';
 import React, { useState, useEffect } from 'react';
 import Highlighter from 'react-highlight-words';
 import Sidebar from './Sidebar';
@@ -240,9 +241,10 @@ const TextHighlighter: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-row">
       {/* <pre>{JSON.stringify(data[0], null, 2)}</pre> */}
       <div className="p-4 bg-gray-100">
+        <h2 className="text-2xl mb-4">Aligned verses</h2>
         {data.map(
           (item, index) =>
             index < 10 && (
@@ -321,11 +323,10 @@ const TextHighlighter: React.FC = () => {
             ),
         )}
       </div>
-      <div className="p-4 bg-white shadow-lg rounded-lg my-4">
-        {JSON.stringify(selectedTokenIds)}
+      <div className="px-4 bg-white shadow-lg rounded-lg">
+        <Sidebar verseData={activeVerse} tokenIds={selectedTokenIds} />
       </div>
-      <Sidebar verseData={activeVerse} tokenIds={selectedTokenIds} />
-    </>
+    </div>
   );
 };
 

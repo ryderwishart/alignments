@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ApolloClient from 'apollo-boost';
 import { gql } from 'apollo-boost';
 import { VerseData } from './TextHighlighter';
+import './index.css';
 
 interface SidebarProps {
   verseData: VerseData;
@@ -107,37 +108,34 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
     }
   }, [verseData, tokenIds]);
 
-  /**
-   *
-   * Here's some example data returned from endpoint:
-   *{"data":{"passage":[{"tokens":[{"data":{"pos":"preposition","ref":"GEN 1:1!1","lang":"H","sdbh":"","stem":"","text":"בְּ","type":"","after":"","class":"prep","frame":"","gloss":"","greek":"ἐν","lemma":"בְּ","morph":"R","state":"","gender":"","number":"","person":"","xmlId":"o010010010011","english":"in","extends":"","subjref":"","mandarin":"","lexdomain":"","coredomain":"","greekstrong":"1722","sensenumber":"","stronglemma":"b","strongnumberx":"0871a","participantref":"","transliteration":"bə","contextualdomain":"","augmentedStrongs":"b"},"__typename":"WordToken"},{"data":{"pos":"noun","ref":"GEN 1:1!1","lang":"H","sdbh":"006652001001000","stem":"","text":"רֵאשִׁ֖ית","type":"common","after":" ","class":"noun","frame":"","gloss":"","greek":"ἀρξῇ","lemma":"רֵאשִׁית","morph":"Ncfsa","state":"absolute","gender":"feminine","number":"singular","person":"","xmlId":"o010010010012","english":"beginning","extends":"","subjref":"","mandarin":"起初","lexdomain":"002003003004","coredomain":"","greekstrong":"746","sensenumber":"1","stronglemma":"7225","strongnumberx":"7225","participantref":"","transliteration":"rēʾšiyṯ","contextualdomain":"","augmentedStrongs":"7225"},"__typename":"WordToken"}, ...
-   */
-
-  console.log({ tokenIds, responseData });
-  //   const clickedTokens = responseData?.data.passage.tokens.filter((token) =>
-  //     tokenIds.includes(token.data.xmlId),
-  //   );
   const clickedTokens = responseData?.data?.passage[0]['tokens'].filter(
     (token: Token) => {
-      console.log({ token });
       return tokenIds.includes(token.data.xmlId);
     },
   );
   return (
-    <div className="w-64 h-screen bg-gray-800 text-white p-5">
-      <h2 className="text-2xl mb-4">Sidebar</h2>
+    <div className="w-64 bg-gray-800 text-white p-5">
+      <h2 className="text-2xl mb-4">Data from Atlas</h2>
       <div className="flex flex-col">
         {clickedTokens?.map((token: Token) => {
           return (
-            <div className="flex flex-row mb-4">
-              {Object.keys(token.data).map((key) => {
-                return (
-                  <div className="flex flex-row">
-                    <div className="text-sm">{key}</div>
-                    <div className="text-xs">{token.data[key]}</div>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col mb-4">
+              <div className="bg-white shadow-lg rounded-lg p-4">
+                {Object.keys(token.data)
+                  .filter((key) => token.data[key])
+                  .map((key) => {
+                    return (
+                      <div className="grid grid-cols-2 items-center gap-1 border-b border-gray-300">
+                        <div className="text-sm text-gray-700 text-left">
+                          {key}
+                        </div>
+                        <div className="text-xs text-gray-700 text-right">
+                          {token.data[key]}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           );
         })}
