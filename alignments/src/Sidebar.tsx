@@ -113,6 +113,9 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
       return tokenIds.includes(token.data.xmlId);
     },
   );
+
+  const keysToDisplay = ['lemma', 'morph', 'english'];
+
   return (
     <div className="w-64 bg-gray-800 text-white p-5">
       <h2 className="text-2xl mb-4">Data from Atlas</h2>
@@ -122,7 +125,9 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
             <div className="flex flex-col mb-4">
               <div className="bg-white shadow-lg rounded-lg p-4">
                 {Object.keys(token.data)
-                  .filter((key) => token.data[key])
+                  .filter(
+                    (key) => token.data[key] && keysToDisplay.includes(key),
+                  )
                   .map((key) => {
                     return (
                       <div className="grid grid-cols-2 items-center gap-1 border-b border-gray-300">
