@@ -7,5 +7,6 @@ export default {
   theme: {
     extend: {},
   },
+  mode: 'jit',
   plugins: [],
 }

@@ -5,7 +5,7 @@ import { VerseData } from './TextHighlighter';
 import './index.css';
 
 interface SidebarProps {
-  verseData: VerseData;
+  verseData?: VerseData;
   tokenIds: string[];
 }
 
@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
               <div className="bg-white shadow-lg rounded-lg p-4">
                 {Object.keys(token.data)
                   .filter(
-                    (key) => token.data[key] && keysToDisplay.includes(key),
+                    (key) => token?.data[key] && keysToDisplay.includes(key),
                   )
                   .map((key) => {
                     return (
@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
                           {key}
                         </div>
                         <div className="text-xs text-gray-700 text-right">
-                          {token.data[key]}
+                          {token?.data[key]}
                         </div>
                       </div>
                     );
