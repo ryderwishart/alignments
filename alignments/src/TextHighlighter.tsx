@@ -133,24 +133,23 @@ const TextHighlighter: React.FC = () => {
 
   const fetchVerseIndicesBySearchString = async (searchString: string, limit = 10) => {
     const indicesFound: number[] = [];
-    await fetch('/data.jsonl')
-    .then((response) => response.text())
-    .then((text) => {
-      const lines = text.split('\n').filter((line) => line);
-      lines.forEach((line, index) => {
-        if(line.toLowerCase().includes(searchString.toLowerCase()) && indicesFound.length < limit) {
-          indicesFound.push(index);
-        }
-      });
+    const responses = await Promise.all([fetch('/data-chunk-NT.jsonl'), fetch('/data-chunk-OT-1.jsonl'), fetch('/data-chunk-OT-2.jsonl')]);
+    const texts = await Promise.all(responses.map(response => response.text()));
+    const lines = texts.flatMap(text => text.split('\n').filter((line) => line));
+
+    lines.forEach((line, index) => {
+      if(line.toLowerCase().includes(searchString.toLowerCase()) && indicesFound.length < limit) {
+        indicesFound.push(index);
+      }
     });
     return indicesFound;
   }
 
   const fetchVersesByIndices = async (indices: number[]) => {
     const jsonData: VerseData[] = [];
-    const response = await fetch('/data.jsonl');
-    const text = await response.text();
-    const lines = text.split('\n').filter((line) => line);
+    const responses = await Promise.all([fetch('/data-chunk-NT.jsonl'), fetch('/data-chunk-OT-1.jsonl'), fetch('/data-chunk-OT-2.jsonl')]);
+    const texts = await Promise.all(responses.map(response => response.text()));
+    const lines = texts.flatMap(text => text.split('\n').filter((line) => line));
 
     indices.forEach((index) => {
       try {
