@@ -131,22 +131,19 @@ const TextHighlighter: React.FC = () => {
     setSelectedTokenIds(matchingIds);
   };
 
-  const fetchVerseIndexByVref = async (vref: string) => {
-    console.log(vref)
-    let indexFound = -1;
+  const fetchVerseIndicesBySearchString = async (searchString: string, limit = 10) => {
+    const indicesFound: number[] = [];
     await fetch('/data.jsonl')
     .then((response) => response.text())
     .then((text) => {
       const lines = text.split('\n').filter((line) => line);
       lines.forEach((line, index) => {
-        
-        if(line.toLowerCase().includes(vref.toLowerCase())) {
-          console.log('line found', line)
-          indexFound = index;
+        if(line.toLowerCase().includes(searchString.toLowerCase()) && indicesFound.length < limit) {
+          indicesFound.push(index);
         }
       });
     });
-    return indexFound;
+    return indicesFound;
   }
 
   const fetchVersesByIndices = async (indices: number[]) => {
@@ -167,13 +164,13 @@ const TextHighlighter: React.FC = () => {
     return jsonData;
   }
 // todo: bold the string that was searched
-  const fetchVerseAndSiblingsByVref = async (verseVref:string) => {
-    console.log({verseVref})
+  const fetchVerseAndSiblingsByVref = async (searchString:string) => {
+    console.log({searchString})
     // fetch verse by veref
     // fetch verse before verse in question and verse afer vers in question 
-    const verseIndex = await fetchVerseIndexByVref(verseVref)
-    console.log({verseIndex})
-    const versesToDisplay = await fetchVersesByIndices([ verseIndex - 1, verseIndex, verseIndex + 1])
+    const verseIndices = await fetchVerseIndicesBySearchString(searchString)
+    console.log({verseIndex: verseIndices})
+    const versesToDisplay = await fetchVersesByIndices(verseIndices)
     setVersesToDisplay(versesToDisplay)
   }
 
@@ -208,6 +205,7 @@ const TextHighlighter: React.FC = () => {
                 onMouseEnter={() => handleVerseHover(item)}
                 onMouseLeave={() => handleVerseHover(null)}
               >
+                <span>{item.vref}</span>
                 <div className="macula">
                   {item.alignment.map((alignment: Alignment, aIdx: number) => (
                     <span
@@ -303,7 +301,7 @@ const TextHighlighter: React.FC = () => {
         )}
       </div>
       <div className="px-4 bg-white fixed right-0 w-1/4">
-        <Sidebar verseData={activeVerse || null} tokenIds={selectedTokenIds} />
+        <Sidebar verseData={activeVerse || undefined} tokenIds={selectedTokenIds} />
       </div>
     </div>
   );
