@@ -1,6 +1,6 @@
 import './TextHighlighter.css';
 import './index.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Highlighter from 'react-highlight-words';
 import Sidebar from './Sidebar';
 
@@ -40,7 +40,7 @@ export interface VerseData {
 
 interface Alignment {
   'English phrase': Phrase;
-  'Hebrew phrase'?: Phrase;
+  'Macula phrase'?: Phrase;
   'Greek phrase'?: Phrase;
   'Target phrase': Phrase;
   'Pseudo-English phrase'?: string;
@@ -51,43 +51,45 @@ interface Phrase {
   ranges: Range[];
 }
 
-const colors_for_labels = {
-  CARDINAL: 'red-500',
-  DATE: 'blue-500',
-  EVENT: 'green-500',
-  FAC: 'yellow-500',
-  GPE: 'purple-500',
-  LANGUAGE: 'pink-500',
-  LAW: 'indigo-500',
-  LOC: 'gray-500',
-  MONEY: 'red-900',
-  NORP: 'blue-900',
-  ORDINAL: 'green-900',
-  ORG: 'yellow-900',
-  PERCENT: 'purple-900',
-  PERSON: 'pink-900',
-  PRODUCT: 'indigo-900',
-  QUANTITY: 'gray-900',
-  TIME: 'red-300',
-  WORK_OF_ART: 'blue-300',
-};
+// const colors_for_labels = {
+//   CARDINAL: 'red-500',
+//   DATE: 'blue-500',
+//   EVENT: 'green-500',
+//   FAC: 'yellow-500',
+//   GPE: 'purple-500',
+//   LANGUAGE: 'pink-500',
+//   LAW: 'indigo-500',
+//   LOC: 'gray-500',
+//   MONEY: 'red-900',
+//   NORP: 'blue-900',
+//   ORDINAL: 'green-900',
+//   ORG: 'yellow-900',
+//   PERCENT: 'purple-900',
+//   PERSON: 'pink-900',
+//   PRODUCT: 'indigo-900',
+//   QUANTITY: 'gray-900',
+//   TIME: 'red-300',
+//   WORK_OF_ART: 'blue-300',
+// };
 
 const TextHighlighter: React.FC = () => {
-  const [data, setData] = useState<VerseData[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
+  // const [data, setData] = useState<VerseData[]>([]);
   const [activePhrase, setActivePhrase] = useState<Alignment | null>();
   const [activeVerse, setActiveVerse] = useState<VerseData | null>();
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
 
-  const data_path = '/ranges-for-alignments chunk 2.jsonl';
-  useEffect(() => {
-    fetch(data_path)
-      .then((response) => response.text())
-      .then((text) => {
-        const lines = text.split('\n').filter((line) => line);
-        const jsonData = lines.map((line) => JSON.parse(line));
-        setData(jsonData);
-      });
-  }, []);
+  // const data_path = '/ranges-for-alignments chunk 2.jsonl';
+  // useEffect(() => {
+  //   fetch(data_path)
+  //     .then((response) => response.text())
+  //     .then((text) => {
+  //       const lines = text.split('\n').filter((line) => line);
+  //       const jsonData = lines.map((line) => JSON.parse(line));
+  //       setData(jsonData);
+  //     });
+  // }, []);
 
   const handlePhraseHover = (alignment: Alignment | null) => {
     setActivePhrase(alignment);
@@ -101,17 +103,14 @@ const TextHighlighter: React.FC = () => {
     setActiveVerse(currentVerse);
 
     // Extract the phrases from the alignment
-    const phrases = ['Greek phrase', 'Hebrew phrase']
-      .map((key: string) => alignment[key])
-      .filter(Boolean);
-
+    const phrase = alignment['Macula phrase']
     // Initialize an empty array to store the matching ids
     const matchingIds: string[] = [];
 
     // Iterate over each phrase
-    phrases.forEach((phrase) => {
+    // phrases.forEach((phrase) => {
       // Iterate over each range in the phrase
-      phrase.ranges.forEach(
+      phrase?.ranges.forEach(
         (range: { endPosition: number; startPosition: number }) => {
           // Iterate over each token in the current verse
           currentVerse?.macula?.token_ids?.forEach((token) => {
@@ -126,19 +125,82 @@ const TextHighlighter: React.FC = () => {
           });
         },
       );
-    });
+    // });
 
     // Set the selected token ids to the matching ids
     setSelectedTokenIds(matchingIds);
   };
 
+  const fetchVerseIndexByVref = async (vref: string) => {
+    console.log(vref)
+    let indexFound = -1;
+    await fetch('/data.jsonl')
+    .then((response) => response.text())
+    .then((text) => {
+      const lines = text.split('\n').filter((line) => line);
+      lines.forEach((line, index) => {
+        
+        if(line.toLowerCase().includes(vref.toLowerCase())) {
+          console.log('line found', line)
+          indexFound = index;
+        }
+      });
+    });
+    return indexFound;
+  }
+
+  const fetchVersesByIndices = async (indices: number[]) => {
+    const jsonData: VerseData[] = [];
+    const response = await fetch('/data.jsonl');
+    const text = await response.text();
+    const lines = text.split('\n').filter((line) => line);
+
+    indices.forEach((index) => {
+      try {
+        const parsedLine = JSON.parse(lines[index]);
+        jsonData.push(parsedLine);
+      } catch (error) {
+        console.error(`Error parsing line at index ${index}: ${lines[index]}`, error);
+      }
+    });
+
+    return jsonData;
+  }
+// todo: bold the string that was searched
+  const fetchVerseAndSiblingsByVref = async (verseVref:string) => {
+    console.log({verseVref})
+    // fetch verse by veref
+    // fetch verse before verse in question and verse afer vers in question 
+    const verseIndex = await fetchVerseIndexByVref(verseVref)
+    console.log({verseIndex})
+    const versesToDisplay = await fetchVersesByIndices([ verseIndex - 1, verseIndex, verseIndex + 1])
+    setVersesToDisplay(versesToDisplay)
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    fetchVerseAndSiblingsByVref(inputValue);
+  };
+
   return (
     <div className="flex flex-row">
       <div className="p-4 bg-gray-100 w-3/4">
-        <h2 className="text-2xl mb-4">Aligned verses (total: {data.length})</h2>
-        {data.map(
-          (item, index) =>
-            index < 10 && (
+        <h2 className="text-2xl mb-4">Aligned verses (total: {versesToDisplay.length})</h2>
+        {/* Add a form with an input and a submit button */}
+        <form onSubmit={handleInputSubmit}>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+          />
+          <button type="submit">Submit</button>
+        </form>
+        {versesToDisplay.map(
+          (item, index) => (
               <div
                 key={index}
                 className="text-block p-4 bg-white shadow-lg rounded-lg my-4"
@@ -188,7 +250,7 @@ const TextHighlighter: React.FC = () => {
                       activePhrase?.['English phrase']?.[
                         'original-text-value'
                       ] || '',
-                      activePhrase?.['Hebrew phrase']?.[
+                      activePhrase?.['Macula phrase']?.[
                         'original-text-value'
                       ] || '',
                       activePhrase?.['Target phrase']?.[
@@ -206,7 +268,7 @@ const TextHighlighter: React.FC = () => {
                       activePhrase?.['English phrase']?.[
                         'original-text-value'
                       ] || '',
-                      activePhrase?.['Hebrew phrase']?.[
+                      activePhrase?.['Macula phrase']?.[
                         'original-text-value'
                       ] || '',
                       activePhrase?.['Target phrase']?.[
@@ -224,7 +286,7 @@ const TextHighlighter: React.FC = () => {
                       activePhrase?.['English phrase']?.[
                         'original-text-value'
                       ] || '',
-                      activePhrase?.['Hebrew phrase']?.[
+                      activePhrase?.['Macula phrase']?.[
                         'original-text-value'
                       ] || '',
                       activePhrase?.['Target phrase']?.[
