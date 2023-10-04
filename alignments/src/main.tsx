@@ -9,7 +9,7 @@ import { MultimediaMetadata } from './MainDisplay';
 const container = document.getElementById('root');
 const root = createRoot(container);
 
-const tsvMultimediaManifestPath = '/UBS-images-metadata_updated.tsv';
+const tsvMultimediaManifestPath = '/UBS-images-metadata.tsv_updated.tsv';
 
 const App: React.FC = () => {
   const [multimediaManifest, setMultimediaManifest] = useState<
@@ -22,13 +22,22 @@ const App: React.FC = () => {
       .then((text) => {
         const normText = text.normalize('NFC');
         const lines = normText.split('\n');
-        const headers = lines[0].split('\t');
+        let headers = lines[0].split('\t');
+        // Strip off the return character if present
+        headers = headers.map((header) =>
+          header.endsWith('\r') ? header.slice(0, -1) : header,
+        );
         const data = lines.slice(1).map((line) => {
           const obj = {};
           const currentline = line.split('\t');
           headers.forEach((header, i) => {
             // Ensure the metadata is unicode normalized for combining characters
-            obj[header] = currentline[i]?.normalize('NFC');
+            let value = currentline[i]?.normalize('NFC');
+            // Strip off the return character if present
+            if (value?.endsWith('\r')) {
+              value = value.slice(0, -1);
+            }
+            obj[header] = value;
           });
           return obj;
         });

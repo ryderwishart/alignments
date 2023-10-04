@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     return matchingTags?.length && matchingTags?.length > 0;
   });
 
-  console.log({ filteredMultiMediaManifest, multiMediaManifest });
+  //   console.log({ filteredMultiMediaManifest, multiMediaManifest });
 
   //   filteredMultiMediaManifest?.forEach((item) => {
   //     item.URL && console.log(item.URL, convertUrl(item.URL));
@@ -120,10 +120,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                     );
                   })}
                 {filteredMultiMediaManifest?.map((item) => {
-                  if (
-                    item.Tags?.includes(token.data.lemma) &&
-                    item.updatedURL
-                  ) {
+                  console.log({
+                    match: item.Tags?.includes(token.data.lemma),
+                    up_url_present: item.updatedURL,
+                    urlpresent: item.URL,
+                    item,
+                  });
+                  if (item.Tags?.includes(token.data.lemma)) {
                     return (
                       <div className="text-red-900 bg-white shadow-lg rounded-lg p-4 mt-4">
                         <img
