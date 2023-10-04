@@ -1,59 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import ApolloClient from 'apollo-boost';
 import { gql } from 'apollo-boost';
-import { VerseData } from './TextHighlighter';
+import { VerseData, MultimediaMetadata } from './MainDisplay';
 import './index.css';
+import { convertUrl } from './utils';
 
 interface SidebarProps {
   verseData?: VerseData;
   tokenIds: string[];
+  multiMediaManifest: MultimediaMetadata[] | null;
 }
 
 const client = new ApolloClient({
-  uri: 'https://macula-atlas-api-qa-25c5xl4maa-uk.a.run.app/graphql/',
+  uri: 'https://conceptual-hierarchies---macula-atlas-api-qa-25c5xl4maa-uk.a.run.app/graphql/',
 });
 
 interface Token {
-  /**
-     * {
-    "data": {
-      "pos": "verb",
-      "ref": "GEN 1:10!9",
-      "lang": "H",
-      "sdbh": "006633001001000",
-      "stem": "qal",
-      "text": "יַּ֥רְא",
-      "type": "wayyiqtol",
-      "after": " ",
-      "class": "verb",
-      "frame": "A0:010010100101; A1:010010100121;",
-      "gloss": "",
-      "greek": "εἶδεν",
-      "lemma": "רָאָה",
-      "morph": "Vqw3ms",
-      "state": "",
-      "gender": "masculine",
-      "number": "singular",
-      "person": "third",
-      "xmlId": "o010010100092",
-      "english": "saw",
-      "extends": "",
-      "subjref": "",
-      "mandarin": "看",
-      "lexdomain": "002004001005",
-      "coredomain": "",
-      "greekstrong": "1492",
-      "sensenumber": "1",
-      "stronglemma": "7200",
-      "strongnumberx": "7200",
-      "participantref": "",
-      "transliteration": "yyarəʾ",
-      "contextualdomain": "075002",
-      "augmentedStrongs": "7200"
-    },
-    "__typename": "WordToken"
-  },
-     */
   data: {
     text: string;
     gloss: string;
@@ -81,7 +43,11 @@ interface DataResponse {
   };
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  verseData,
+  tokenIds,
+  multiMediaManifest,
+}) => {
   const [responseData, setResponseData] = useState<DataResponse | null>(null);
 
   useEffect(() => {
@@ -102,7 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
           },
         })
         .then((result: DataResponse | null) => {
-          console.log(JSON.stringify(result));
           setResponseData(result);
         });
     }
@@ -115,6 +80,20 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
   );
 
   const keysToDisplay = ['lemma', 'morph', 'english'];
+
+  const filteredMultiMediaManifest = multiMediaManifest?.filter((item) => {
+    const matchingTags = item.Tags?.filter((tag) =>
+      clickedTokens?.map((token) => token?.data?.lemma).includes(tag),
+    );
+    return matchingTags?.length && matchingTags?.length > 0;
+  });
+
+  console.log({ filteredMultiMediaManifest, multiMediaManifest });
+
+  //   filteredMultiMediaManifest?.forEach((item) => {
+  //     item.URL && console.log(item.URL, convertUrl(item.URL));
+  //     item.newURL ? (item.URL = convertUrl(item.URL)) : 'no url';
+  //   });
 
   return (
     <div className="w-64 bg-gray-800 text-white p-5">
@@ -140,6 +119,26 @@ const Sidebar: React.FC<SidebarProps> = ({ verseData, tokenIds }) => {
                       </div>
                     );
                   })}
+                {filteredMultiMediaManifest?.map((item) => {
+                  if (
+                    item.Tags?.includes(token.data.lemma) &&
+                    item.updatedURL
+                  ) {
+                    return (
+                      <div className="text-red-900 bg-white shadow-lg rounded-lg p-4 mt-4">
+                        <img
+                          src={item.updatedURL}
+                          alt={item.FileName}
+                          className="w-full h-64 object-cover"
+                        />
+                        <div className="text-sm text-gray-700 mt-2">
+                          {item.FileName}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               </div>
             </div>
           );

@@ -1,4 +1,4 @@
-import './TextHighlighter.css';
+import './MainDisplay.css';
 import './index.css';
 import React, { useState } from 'react';
 import Highlighter from 'react-highlight-words';
@@ -72,7 +72,24 @@ interface Phrase {
 //   WORK_OF_ART: 'blue-300',
 // };
 
-const TextHighlighter: React.FC = () => {
+export interface MultimediaMetadata {
+  Authors?: string;
+  Description: string;
+  FileName: string;
+  Id: string;
+  Subject: string;
+  Tags?: string[];
+  ThematicLink: string;
+  Title: string;
+  URL?: string;
+  updatedURL?: string;
+}
+
+interface MainDisplayProps {
+  multimediaManifest: Promise<MultimediaMetadata[]>;
+}
+
+const MainDisplay: React.FC<MainDisplayProps> = (props) => {
   const [inputValue, setInputValue] = useState('');
   const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
   // const [data, setData] = useState<VerseData[]>([]);
@@ -80,6 +97,8 @@ const TextHighlighter: React.FC = () => {
   const [activeVerse, setActiveVerse] = useState<VerseData | null>();
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
   const [showAlt, setShowAlt] = useState(false);
+
+  // console.log(props.multimediaManifest);
 
   // const data_path = '/ranges-for-alignments chunk 2.jsonl';
   // useEffect(() => {
@@ -214,7 +233,6 @@ const TextHighlighter: React.FC = () => {
         <h2 className="text-2xl mb-4">
           Aligned verses (total: {versesToDisplay.length})
         </h2>
-        {/* Add a form with an input and a submit button */}
         <form
           className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-row gap-2"
           onSubmit={handleInputSubmit}
@@ -232,7 +250,6 @@ const TextHighlighter: React.FC = () => {
             Submit
           </button>
         </form>
-        {/* Add a checkbox to toggle the showAlt state */}
         <div className="flex items-center mb-4">
           <input
             className="mr-2 leading-tight"
@@ -341,10 +358,11 @@ const TextHighlighter: React.FC = () => {
         <Sidebar
           verseData={activeVerse || undefined}
           tokenIds={selectedTokenIds}
+          multiMediaManifest={props.multimediaManifest}
         />
       </div>
     </div>
   );
 };
 
-export default TextHighlighter;
+export default MainDisplay;
