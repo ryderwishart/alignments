@@ -15,6 +15,7 @@ interface DataObject {
   [key: string]: string | undefined;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const App: React.FC = () => {
   const [multimediaManifest, setMultimediaManifest] = useState<
     MultimediaMetadata[] | null
