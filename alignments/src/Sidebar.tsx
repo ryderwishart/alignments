@@ -11,7 +11,7 @@ interface SidebarProps {
 }
 
 const client = new ApolloClient({
-  uri: 'https://conceptual-hierarchies---macula-atlas-api-qa-25c5xl4maa-uk.a.run.app/graphql/',
+  uri: 'https://v23-09-26---macula-atlas-api-qa-25c5xl4maa-uk.a.run.app/graphql/',
 });
 
 interface Token {
