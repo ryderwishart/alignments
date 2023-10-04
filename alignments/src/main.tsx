@@ -6,10 +6,14 @@ import './MainDisplay.css';
 import './index.css';
 import { MultimediaMetadata } from './MainDisplay';
 
-const container = document.getElementById('root');
+const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 
 const tsvMultimediaManifestPath = '/UBS-images-metadata.tsv_updated.tsv';
+
+interface DataObject {
+  [key: string]: string | undefined;
+}
 
 const App: React.FC = () => {
   const [multimediaManifest, setMultimediaManifest] = useState<
@@ -27,8 +31,8 @@ const App: React.FC = () => {
         headers = headers.map((header) =>
           header.endsWith('\r') ? header.slice(0, -1) : header,
         );
-        const data = lines.slice(1).map((line) => {
-          const obj = {};
+        const data: DataObject[] = lines.slice(1).map((line) => {
+          const obj: DataObject = {};
           const currentline = line.split('\t');
           headers.forEach((header, i) => {
             // Ensure the metadata is unicode normalized for combining characters
@@ -44,13 +48,19 @@ const App: React.FC = () => {
 
         // I need to split the 'Tags' column into an array by semi-colon plus space
         // and then filter out any empty strings.
-        data.forEach((datum) => {
-          datum['Tags'] = datum['Tags']
-            ?.split('; ')
-            ?.filter((tag) => tag !== '');
+        const updatedData = data.map((datum: DataObject) => {
+          if (typeof datum['Tags'] === 'string') {
+            return {
+              ...datum,
+              Tags: datum['Tags']
+                .split('; ')
+                .filter((tag: string) => tag !== ''),
+            };
+          }
+          return datum;
         });
 
-        setMultimediaManifest(data);
+        setMultimediaManifest(updatedData as MultimediaMetadata[]);
       });
   }, []);
 

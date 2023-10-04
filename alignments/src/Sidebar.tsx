@@ -3,7 +3,6 @@ import ApolloClient from 'apollo-boost';
 import { gql } from 'apollo-boost';
 import { VerseData, MultimediaMetadata } from './MainDisplay';
 import './index.css';
-import { convertUrl } from './utils';
 
 interface SidebarProps {
   verseData?: VerseData;
@@ -32,6 +31,7 @@ interface Token {
     greek: string;
     lemma: string;
     morph: string;
+    [key: string]: string;
   };
 }
 

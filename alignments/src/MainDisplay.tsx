@@ -86,7 +86,7 @@ export interface MultimediaMetadata {
 }
 
 interface MainDisplayProps {
-  multimediaManifest: Promise<MultimediaMetadata[]>;
+  multimediaManifest: MultimediaMetadata[] | null;
 }
 
 const MainDisplay: React.FC<MainDisplayProps> = (props) => {

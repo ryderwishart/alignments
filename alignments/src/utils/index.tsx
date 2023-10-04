@@ -2,7 +2,6 @@ export function convertUrl(urlStr: string): string {
   try {
     const parsedUrl = new URL(urlStr);
     const path = parsedUrl.pathname;
-    const filename = path.split('/').pop();
     const newPath = '/wikipedia/commons' + path.split('/').slice(-2).join('/');
     const newUrl = new URL('https://upload.wikimedia.org' + newPath);
     return newUrl.href;
