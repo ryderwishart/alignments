@@ -307,6 +307,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                 })}
             </div>
             <div className="bsb">
+              <span className="text-gray-900 font-bold">English Bible: </span>
               <Highlighter
                 highlightClassName="highlight bg-yellow-300"
                 searchWords={[
@@ -322,6 +323,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
               />
             </div>
             <div className="macula">
+              <span className="text-gray-900 font-bold">Source Language: </span>{' '}
               <Highlighter
                 highlightClassName="highlight bg-yellow-300"
                 searchWords={[
@@ -337,6 +339,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
               />
             </div>
             <div className="target">
+              <span className="text-gray-900 font-bold">Target Language: </span>
               <Highlighter
                 highlightClassName="highlight bg-yellow-300"
                 searchWords={[
@@ -354,7 +357,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
           </div>
         ))}
       </div>
-      <div className="px-4 bg-white fixed right-0 w-1/4">
+      <div className="px-4 bg-white fixed right-0 w-1/4 overflow-scroll">
         <Sidebar
           verseData={activeVerse || undefined}
           tokenIds={selectedTokenIds}

@@ -96,9 +96,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   //   });
 
   return (
-    <div className="w-64 bg-gray-800 text-white p-5">
-      <h2 className="text-2xl mb-4">Data from Atlas</h2>
-      <div className="flex flex-col">
+    <div className="w-64 bg-gray-800 text-white p-5 overflow-y-scroll">
+      <h2 className="text-2xl mb-4">Greek/Hebrew Data</h2>
+      <div className="flex flex-col h-screen overflow-y-scroll">
         {clickedTokens?.map((token: Token) => {
           return (
             <div className="flex flex-col mb-4">
