@@ -35,7 +35,8 @@ export interface VerseData {
   macula: Verse;
   target: Verse;
   alt: string;
-  alignment: Alignment[];
+  alignment?: Alignment[];
+  alignments?: Alignment[];
 }
 
 interface Alignment {
@@ -90,11 +91,14 @@ interface MainDisplayProps {
 }
 
 enum CorpusFolderName {
-  TOK_PISIN = "tok-pisin",
-  SPANISH = "spanish"
+  TOK_PISIN = 'tok-pisin',
+  SPANISH = 'spanish',
+  FRENCH = 'french',
 }
 const MainDisplay: React.FC<MainDisplayProps> = (props) => {
-  const [selectedCorpus, setSelectedCorpus] = useState<CorpusFolderName>(CorpusFolderName.TOK_PISIN);
+  const [selectedCorpus, setSelectedCorpus] = useState<CorpusFolderName>(
+    CorpusFolderName.TOK_PISIN,
+  );
   const [inputValue, setInputValue] = useState('');
   const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
   // const [data, setData] = useState<VerseData[]>([]);
@@ -158,19 +162,20 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const getAlignmentData = async () => {
     const responses = await Promise.all([
-      fetch("/" + selectedCorpus + '/data-chunk-NT.jsonl'),
-      fetch("/" + selectedCorpus + '/data-chunk-OT-1.jsonl'),
-      fetch("/" + selectedCorpus + '/data-chunk-OT-2.jsonl'),
+      // NOTE: the file names are hard-coded here
+      fetch('/' + selectedCorpus + '/data-chunk-aa.jsonl'),
+      fetch('/' + selectedCorpus + '/data-chunk-ab.jsonl'),
+      fetch('/' + selectedCorpus + '/data-chunk-ac.jsonl'),
     ]);
-    return responses
-  }
+    return responses;
+  };
 
   const fetchVerseIndicesBySearchString = async (
     searchString: string,
     limit = 10,
   ) => {
     const indicesFound: number[] = [];
-    const responses = await getAlignmentData()
+    const responses = await getAlignmentData();
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -191,7 +196,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const fetchVersesByIndices = async (indices: number[]) => {
     const jsonData: VerseData[] = [];
-    const responses = await await getAlignmentData()
+    const responses = await await getAlignmentData();
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -235,8 +240,8 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const handleCorpusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCorpus(event.target.value as CorpusFolderName);
-    setInputValue('')
-    setVersesToDisplay([])
+    setInputValue('');
+    setVersesToDisplay([]);
   };
 
   return (
@@ -253,6 +258,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
           >
             <option value={CorpusFolderName.TOK_PISIN}>Tok Pisin</option>
             <option value={CorpusFolderName.SPANISH}>Spanish</option>
+            <option value={CorpusFolderName.FRENCH}>French</option>
           </select>
         </div>
         <form
@@ -290,18 +296,21 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
           >
             <span>{item.vref}</span>
             <div className="macula">
-              {item.alignment.map((alignment: Alignment, aIdx: number) => (
-                <span
-                  key={aIdx}
-                  onMouseEnter={() => handlePhraseHover(alignment)}
-                  onMouseLeave={() => handlePhraseHover(null)}
-                  onClick={() => handlePhraseClick(item, alignment)}
-                  className="cursor-pointer text-blue-600 hover:text-blue-800"
-                >
-                  Translation unit {aIdx + 1}
-                  {aIdx + 1 < item.alignment.length && ' | '}
-                </span>
-              ))}
+              {(item.alignment || item.alignments)?.map(
+                (alignment: Alignment, aIdx: number) => (
+                  <span
+                    key={aIdx}
+                    onMouseEnter={() => handlePhraseHover(alignment)}
+                    onMouseLeave={() => handlePhraseHover(null)}
+                    onClick={() => handlePhraseClick(item, alignment)}
+                    className="cursor-pointer text-blue-600 hover:text-blue-800"
+                  >
+                    Translation unit {aIdx + 1}
+                    {aIdx + 1 < (item.alignment || item.alignments)?.length &&
+                      ' | '}
+                  </span>
+                ),
+              )}
             </div>
             {showAlt && (
               <div className="italic text-orange-700">{item.alt}</div>
