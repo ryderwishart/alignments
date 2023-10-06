@@ -245,6 +245,16 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
         <h2 className="text-2xl mb-4">
           Aligned verses (total: {versesToDisplay.length})
         </h2>
+        <div className="flex items-center mb-4">
+          <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            value={selectedCorpus}
+            onChange={handleCorpusChange}
+          >
+            <option value={CorpusFolderName.TOK_PISIN}>Tok Pisin</option>
+            <option value={CorpusFolderName.SPANISH}>Spanish</option>
+          </select>
+        </div>
         <form
           className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-row gap-2"
           onSubmit={handleInputSubmit}
@@ -270,16 +280,6 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
             onChange={() => setShowAlt(!showAlt)}
           />
           <span className="text-sm">Show pseudo-English</span>
-        </div>
-        <div className="flex items-center mb-4">
-          <select
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={selectedCorpus}
-            onChange={handleCorpusChange}
-          >
-            <option value={CorpusFolderName.TOK_PISIN}>Tok Pisin</option>
-            <option value={CorpusFolderName.SPANISH}>Spanish</option>
-          </select>
         </div>
         {versesToDisplay.map((item, index) => (
           <div
