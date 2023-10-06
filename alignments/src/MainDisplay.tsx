@@ -235,6 +235,8 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const handleCorpusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCorpus(event.target.value as CorpusFolderName);
+    setInputValue('')
+    setVersesToDisplay([])
   };
 
   return (
