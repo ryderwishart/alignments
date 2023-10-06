@@ -89,7 +89,12 @@ interface MainDisplayProps {
   multimediaManifest: MultimediaMetadata[] | null;
 }
 
+enum CorpusFolderName {
+  TOK_PISIN = "tok-pisin",
+  SPANISH = "spanish"
+}
 const MainDisplay: React.FC<MainDisplayProps> = (props) => {
+  const [selectedCorpus, setSelectedCorpus] = useState<CorpusFolderName>(CorpusFolderName.TOK_PISIN);
   const [inputValue, setInputValue] = useState('');
   const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
   // const [data, setData] = useState<VerseData[]>([]);
@@ -151,16 +156,21 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     setSelectedTokenIds(matchingIds);
   };
 
+  const getAlignmentData = async () => {
+    const responses = await Promise.all([
+      fetch("/" + selectedCorpus + '/data-chunk-NT.jsonl'),
+      fetch("/" + selectedCorpus + '/data-chunk-OT-1.jsonl'),
+      fetch("/" + selectedCorpus + '/data-chunk-OT-2.jsonl'),
+    ]);
+    return responses
+  }
+
   const fetchVerseIndicesBySearchString = async (
     searchString: string,
     limit = 10,
   ) => {
     const indicesFound: number[] = [];
-    const responses = await Promise.all([
-      fetch('/data-chunk-NT.jsonl'),
-      fetch('/data-chunk-OT-1.jsonl'),
-      fetch('/data-chunk-OT-2.jsonl'),
-    ]);
+    const responses = await getAlignmentData()
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -181,11 +191,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const fetchVersesByIndices = async (indices: number[]) => {
     const jsonData: VerseData[] = [];
-    const responses = await Promise.all([
-      fetch('/data-chunk-NT.jsonl'),
-      fetch('/data-chunk-OT-1.jsonl'),
-      fetch('/data-chunk-OT-2.jsonl'),
-    ]);
+    const responses = await await getAlignmentData()
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -227,6 +233,10 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     fetchVerseAndSiblingsByVref(inputValue);
   };
 
+  const handleCorpusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCorpus(event.target.value as CorpusFolderName);
+  };
+
   return (
     <div className="flex flex-row">
       <div className="p-4 bg-gray-100 w-3/4">
@@ -258,6 +268,16 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
             onChange={() => setShowAlt(!showAlt)}
           />
           <span className="text-sm">Show pseudo-English</span>
+        </div>
+        <div className="flex items-center mb-4">
+          <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            value={selectedCorpus}
+            onChange={handleCorpusChange}
+          >
+            <option value={CorpusFolderName.TOK_PISIN}>Tok Pisin</option>
+            <option value={CorpusFolderName.SPANISH}>Spanish</option>
+          </select>
         </div>
         {versesToDisplay.map((item, index) => (
           <div
