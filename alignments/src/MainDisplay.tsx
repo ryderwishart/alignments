@@ -306,8 +306,17 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                     className="cursor-pointer text-blue-600 hover:text-blue-800"
                   >
                     Translation unit {aIdx + 1}
-                    {aIdx + 1 < (item.alignment || item.alignments)?.length &&
-                      ' | '}
+                    {item.alignments
+                      ? item.alignments?.length &&
+                        item.alignments.length > aIdx + 1
+                        ? ' | '
+                        : ''
+                      : item.alignment?.length &&
+                        item.alignment.length > aIdx + 1
+                      ? ' | '
+                      : ''}{' '}
+                    {/* FIXME (please!) only use alignment or alignments, not //
+                    both. Add upstream normalization step */}
                   </span>
                 ),
               )}
