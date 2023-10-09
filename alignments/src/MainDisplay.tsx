@@ -35,7 +35,8 @@ export interface VerseData {
   macula: Verse;
   target: Verse;
   alt: string;
-  alignment: Alignment[];
+  alignment?: Alignment[];
+  alignments?: Alignment[];
 }
 
 interface Alignment {
@@ -89,7 +90,15 @@ interface MainDisplayProps {
   multimediaManifest: MultimediaMetadata[] | null;
 }
 
+enum CorpusFolderName {
+  TOK_PISIN = 'tok-pisin',
+  SPANISH = 'spanish',
+  FRENCH = 'french',
+}
 const MainDisplay: React.FC<MainDisplayProps> = (props) => {
+  const [selectedCorpus, setSelectedCorpus] = useState<CorpusFolderName>(
+    CorpusFolderName.TOK_PISIN,
+  );
   const [inputValue, setInputValue] = useState('');
   const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
   // const [data, setData] = useState<VerseData[]>([]);
@@ -151,16 +160,22 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     setSelectedTokenIds(matchingIds);
   };
 
+  const getAlignmentData = async () => {
+    const responses = await Promise.all([
+      // NOTE: the file names are hard-coded here
+      fetch('/' + selectedCorpus + '/data-chunk-aa.jsonl'),
+      fetch('/' + selectedCorpus + '/data-chunk-ab.jsonl'),
+      fetch('/' + selectedCorpus + '/data-chunk-ac.jsonl'),
+    ]);
+    return responses;
+  };
+
   const fetchVerseIndicesBySearchString = async (
     searchString: string,
     limit = 10,
   ) => {
     const indicesFound: number[] = [];
-    const responses = await Promise.all([
-      fetch('/data-chunk-NT.jsonl'),
-      fetch('/data-chunk-OT-1.jsonl'),
-      fetch('/data-chunk-OT-2.jsonl'),
-    ]);
+    const responses = await getAlignmentData();
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -181,11 +196,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
   const fetchVersesByIndices = async (indices: number[]) => {
     const jsonData: VerseData[] = [];
-    const responses = await Promise.all([
-      fetch('/data-chunk-NT.jsonl'),
-      fetch('/data-chunk-OT-1.jsonl'),
-      fetch('/data-chunk-OT-2.jsonl'),
-    ]);
+    const responses = await await getAlignmentData();
     const texts = await Promise.all(
       responses.map((response) => response.text()),
     );
@@ -227,12 +238,29 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     fetchVerseAndSiblingsByVref(inputValue);
   };
 
+  const handleCorpusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCorpus(event.target.value as CorpusFolderName);
+    setInputValue('');
+    setVersesToDisplay([]);
+  };
+
   return (
     <div className="flex flex-row">
       <div className="p-4 bg-gray-100 w-3/4">
         <h2 className="text-2xl mb-4">
           Aligned verses (total: {versesToDisplay.length})
         </h2>
+        <div className="flex items-center mb-4">
+          <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            value={selectedCorpus}
+            onChange={handleCorpusChange}
+          >
+            <option value={CorpusFolderName.TOK_PISIN}>Tok Pisin</option>
+            <option value={CorpusFolderName.SPANISH}>Spanish</option>
+            <option value={CorpusFolderName.FRENCH}>French</option>
+          </select>
+        </div>
         <form
           className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-row gap-2"
           onSubmit={handleInputSubmit}
@@ -268,18 +296,30 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
           >
             <span>{item.vref}</span>
             <div className="macula">
-              {item.alignment.map((alignment: Alignment, aIdx: number) => (
-                <span
-                  key={aIdx}
-                  onMouseEnter={() => handlePhraseHover(alignment)}
-                  onMouseLeave={() => handlePhraseHover(null)}
-                  onClick={() => handlePhraseClick(item, alignment)}
-                  className="cursor-pointer text-blue-600 hover:text-blue-800"
-                >
-                  Translation unit {aIdx + 1}
-                  {aIdx + 1 < item.alignment.length && ' | '}
-                </span>
-              ))}
+              {(item.alignment || item.alignments)?.map(
+                (alignment: Alignment, aIdx: number) => (
+                  <span
+                    key={aIdx}
+                    onMouseEnter={() => handlePhraseHover(alignment)}
+                    onMouseLeave={() => handlePhraseHover(null)}
+                    onClick={() => handlePhraseClick(item, alignment)}
+                    className="cursor-pointer text-blue-600 hover:text-blue-800"
+                  >
+                    Translation unit {aIdx + 1}
+                    {item.alignments
+                      ? item.alignments?.length &&
+                        item.alignments.length > aIdx + 1
+                        ? ' | '
+                        : ''
+                      : item.alignment?.length &&
+                        item.alignment.length > aIdx + 1
+                      ? ' | '
+                      : ''}{' '}
+                    {/* FIXME (please!) only use alignment or alignments, not //
+                    both. Add upstream normalization step */}
+                  </span>
+                ),
+              )}
             </div>
             {showAlt && (
               <div className="italic text-orange-700">{item.alt}</div>
