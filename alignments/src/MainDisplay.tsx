@@ -351,74 +351,106 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
               <span>{item.vref}</span>
               <div className="macula flex flex-row gap-2">
                 {(item.alignment || item.alignments)?.map(
-                  (alignment: Alignment, aIdx: number) => (
-                    <span
-                      key={aIdx}
-                      onMouseEnter={() => handlePhraseHover(alignment)}
-                      onMouseLeave={() => handlePhraseHover(null)}
-                      onClick={() => handlePhraseClick(item, alignment)}
-                      className="cursor-pointer text-blue-600 hover:text-blue-800 items-center px-2.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800 flex"
-                    >
-                      {
-                        /** Toggleable dropdown for raw data view */
-                        <details className="flex flex-row gap-2 border-b text-blue-600">
-                          <summary />
-                          <div className="bg-white p-2 rounded">
-                            <div className="border rounded m-2 p-2">
-                              <strong>English Phrase:</strong>
-                              <div className="text-orange-700">
-                                {
-                                  alignment['English phrase'][
-                                    'original-text-value'
-                                  ]
-                                }
-                              </div>
-                              <div>
-                                Ranges:{' '}
-                                {JSON.stringify(
-                                  alignment['English phrase'].ranges,
-                                )}
-                              </div>
+                  (alignment: Alignment, aIdx: number) => {
+                    const englishRanges = alignment['English phrase'].ranges;
+                    const maculaRanges = alignment['Macula phrase']?.ranges;
+                    const targetRanges = alignment['Target phrase'].ranges;
+                    const isInvalidRange =
+                      englishRanges.some(
+                        (range) =>
+                          range.startPosition === -1 ||
+                          range.endPosition === -1,
+                      ) ||
+                      maculaRanges?.some(
+                        (range) =>
+                          range.startPosition === -1 ||
+                          range.endPosition === -1,
+                      ) ||
+                      targetRanges.some(
+                        (range) =>
+                          range.startPosition === -1 ||
+                          range.endPosition === -1,
+                      );
+                    const detailsElement = (
+                      <details className="flex flex-row gap-2 border-b text-blue-600">
+                        <summary />
+                        <div className="bg-white p-2 rounded">
+                          <div className="border rounded m-2 p-2">
+                            <strong>English Phrase:</strong>
+                            <div className="text-orange-700">
+                              {
+                                alignment['English phrase'][
+                                  'original-text-value'
+                                ]
+                              }
                             </div>
-                            <div className="border rounded m-2 p-2">
-                              <strong>Macula Phrase:</strong>
-                              <div className="text-orange-700">
-                                {alignment['Macula phrase'] &&
-                                  alignment['Macula phrase'][
-                                    'original-text-value'
-                                  ]}
-                              </div>
-                              <div>
-                                Ranges:{' '}
-                                {alignment['Macula phrase']
-                                  ? JSON.stringify(
-                                      alignment['Macula phrase'].ranges,
-                                    )
-                                  : ''}
-                              </div>
-                            </div>
-                            <div className="border rounded m-2 p-2">
-                              <strong>Target Phrase:</strong>
-                              <div className="text-orange-700">
-                                {
-                                  alignment['Target phrase'][
-                                    'original-text-value'
-                                  ]
-                                }
-                              </div>
-                              <div>
-                                Ranges:{' '}
-                                {JSON.stringify(
-                                  alignment['Target phrase'].ranges,
-                                )}
-                              </div>
+                            <div>
+                              Ranges:{' '}
+                              {JSON.stringify(
+                                alignment['English phrase'].ranges,
+                              )}
                             </div>
                           </div>
-                        </details>
-                      }
-                      Translation unit {aIdx + 1}
-                    </span>
-                  ),
+                          <div className="border rounded m-2 p-2">
+                            <strong>Macula Phrase:</strong>
+                            <div className="text-orange-700">
+                              {alignment['Macula phrase'] &&
+                                alignment['Macula phrase'][
+                                  'original-text-value'
+                                ]}
+                            </div>
+                            <div>
+                              Ranges:{' '}
+                              {alignment['Macula phrase']
+                                ? JSON.stringify(
+                                    alignment['Macula phrase'].ranges,
+                                  )
+                                : ''}
+                            </div>
+                          </div>
+                          <div className="border rounded m-2 p-2">
+                            <strong>Target Phrase:</strong>
+                            <div className="text-orange-700">
+                              {
+                                alignment['Target phrase'][
+                                  'original-text-value'
+                                ]
+                              }
+                            </div>
+                            <div>
+                              Ranges:{' '}
+                              {JSON.stringify(
+                                alignment['Target phrase'].ranges,
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </details>
+                    );
+                    return isInvalidRange ? (
+                      <span
+                        key={aIdx}
+                        onMouseEnter={() => handlePhraseHover(alignment)}
+                        onMouseLeave={() => handlePhraseHover(null)}
+                        onClick={() => handlePhraseClick(item, alignment)}
+                        className="cursor-pointer text-green-600 hover:text-green-800 items-center px-2.5 py-0.5 rounded text-xs bg-green-100 text-green-800 flex"
+                      >
+                        {detailsElement}
+                        Translation unit {aIdx + 1}
+                      </span>
+                    ) : (
+                      <span
+                        key={aIdx}
+                        onMouseEnter={() => handlePhraseHover(alignment)}
+                        onMouseLeave={() => handlePhraseHover(null)}
+                        onClick={() => handlePhraseClick(item, alignment)}
+                        className="cursor-pointer text-blue-600 hover:text-blue-800 items-center px-2.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800 flex"
+                      >
+                        {detailsElement}
+                        Translation unit {aIdx + 1}
+                      </span>
+                    );
+                  },
                 )}
               </div>
               {showAlt && (
