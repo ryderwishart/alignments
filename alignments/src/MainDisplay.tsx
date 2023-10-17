@@ -370,6 +370,19 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                           item.alignment.length > aIdx + 1
                         ? ' | '
                         : ''}{' '}
+                      {
+                      /**  */
+                      /* <div className="flex flex-column gap-2 border-b">
+                        <div>{JSON.stringify(alignment['English phrase'])}</div>
+                        <div>
+                          {JSON.stringify(
+                            alignment['Macula phrase']
+                              ? alignment['Macula phrase']
+                              : '',
+                          )}
+                        </div>
+                        <div>{JSON.stringify(alignment['Target phrase'])}</div>
+                      </div> */}
                     </span>
                   ),
                 )}
