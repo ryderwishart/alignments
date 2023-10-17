@@ -102,10 +102,18 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
   const [inputValue, setInputValue] = useState('');
   const [versesToDisplay, setVersesToDisplay] = useState<VerseData[]>([]);
   // const [data, setData] = useState<VerseData[]>([]);
-  const [activePhrase, setActivePhrase] = useState<Alignment | null>();
+  // const [activePhrase, setActivePhrase] = useState<Alignment | null>();
   const [activeVerse, setActiveVerse] = useState<VerseData | null>();
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
   const [showAlt, setShowAlt] = useState(false);
+
+  const [maculaTextToSearch, setMaculaTextToSearch] = useState<
+    string | undefined
+  >();
+  const [targetTextToSearch, setTargetTextToSearch] = useState<
+    string | undefined
+  >();
+  const [bsbTextToSearch, setBsbTextToSearch] = useState<string | undefined>();
 
   // console.log(props.multimediaManifest);
 
@@ -121,7 +129,53 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
   // }, []);
 
   const handlePhraseHover = (alignment: Alignment | null) => {
-    setActivePhrase(alignment);
+    // setActivePhrase(alignment);
+
+    console.log({ alignment });
+
+    // Get Macula ranges
+    const maculaRanges = alignment?.['Macula phrase']?.ranges;
+    const maculaStartPosition = maculaRanges && maculaRanges[0].startPosition;
+    const maculaEndPosition = maculaRanges && maculaRanges[0].endPosition + 1;
+    const maculaContent = activeVerse?.macula?.content;
+    const maculaTextToSearch = maculaContent?.substring(
+      maculaStartPosition || 0,
+      maculaEndPosition || maculaContent.length - 1,
+    );
+
+    // Get Target ranges
+    const targetRanges = alignment?.['Target phrase']?.ranges;
+    const targetStartPosition = targetRanges && targetRanges[0].startPosition;
+    const targetEndPosition = targetRanges && targetRanges[0].endPosition + 1;
+    const targetContent = activeVerse?.target?.content;
+    const targetTextToSearch = targetContent?.substring(
+      targetStartPosition || 0,
+      targetEndPosition || targetContent.length - 1,
+    );
+
+    // Get BSB ranges
+    const bsbRanges = alignment?.['English phrase']?.ranges;
+    const bsbStartPosition = bsbRanges && bsbRanges[0].startPosition;
+    const bsbEndPosition = bsbRanges && bsbRanges[0].endPosition + 1;
+    const bsbContent = activeVerse?.bsb?.content;
+    const bsbTextToSearch = bsbContent?.substring(
+      bsbStartPosition || 0,
+      bsbEndPosition || bsbContent.length - 1,
+    );
+
+    // Set the textToSearch state variables
+    if (maculaTextToSearch) {
+      console.log({ maculaTextToSearch });
+      setMaculaTextToSearch(maculaTextToSearch);
+    }
+    if (targetTextToSearch) {
+      console.log({ targetTextToSearch });
+      setTargetTextToSearch(targetTextToSearch);
+    }
+    if (bsbTextToSearch) {
+      console.log({ bsbTextToSearch });
+      setBsbTextToSearch(bsbTextToSearch);
+    }
   };
 
   const handleVerseHover = (verse: VerseData | null) => {
@@ -287,115 +341,98 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
           />
           <span className="text-sm">Show pseudo-English</span>
         </div>
-        {versesToDisplay.map((item, index) => (
-          <div
-            key={index}
-            className="text-block p-4 bg-white shadow-lg rounded-lg my-4"
-            onMouseEnter={() => handleVerseHover(item)}
-            onMouseLeave={() => handleVerseHover(null)}
-          >
-            <span>{item.vref}</span>
-            <div className="macula">
-              {(item.alignment || item.alignments)?.map(
-                (alignment: Alignment, aIdx: number) => (
-                  <span
-                    key={aIdx}
-                    onMouseEnter={() => handlePhraseHover(alignment)}
-                    onMouseLeave={() => handlePhraseHover(null)}
-                    onClick={() => handlePhraseClick(item, alignment)}
-                    className="cursor-pointer text-blue-600 hover:text-blue-800"
-                  >
-                    Translation unit {aIdx + 1}
-                    {item.alignments
-                      ? item.alignments?.length &&
-                        item.alignments.length > aIdx + 1
-                        ? ' | '
-                        : ''
-                      : item.alignment?.length &&
-                        item.alignment.length > aIdx + 1
-                      ? ' | '
-                      : ''}{' '}
-                    {/* FIXME (please!) only use alignment or alignments, not //
-                    both. Add upstream normalization step */}
-                  </span>
-                ),
-              )}
-            </div>
-            {showAlt && (
-              <div className="italic text-orange-700">{item.alt}</div>
-            )}
-            <div className="bsb-ner flex flex-row gap-2">
-              {
-                // add a tiny red badge if ner is present and len > 0,
-                item.bsb.ner && item.bsb.ner.length > 0 && (
-                  <span className="text-gray-100 px-1 rounded-l bg-red-500">
-                    concepts:
-                  </span>
-                )
-              }
-              {item.vref === activeVerse?.vref &&
-                item.bsb.ner?.map((ner: NamedEntity, nerIdx: number) => {
-                  //   const color: string = colors_for_labels[ner.label];
-                  return (
+        {versesToDisplay.map((item, index) => {
+          return (
+            <div
+              key={index}
+              className="text-block p-4 bg-white shadow-lg rounded-lg my-4"
+              onMouseEnter={() => handleVerseHover(item)}
+              onMouseLeave={() => handleVerseHover(null)}
+            >
+              <span>{item.vref}</span>
+              <div className="macula">
+                {(item.alignment || item.alignments)?.map(
+                  (alignment: Alignment, aIdx: number) => (
                     <span
-                      key={nerIdx}
-                      className={`text-gray-100 px-1 rounded bg-purple-300`}
+                      key={aIdx}
+                      onMouseEnter={() => handlePhraseHover(alignment)}
+                      onMouseLeave={() => handlePhraseHover(null)}
+                      onClick={() => handlePhraseClick(item, alignment)}
+                      className="cursor-pointer text-blue-600 hover:text-blue-800"
                     >
-                      {ner.name} {ner.label}
+                      Translation unit {aIdx + 1}
+                      {item.alignments
+                        ? item.alignments?.length &&
+                          item.alignments.length > aIdx + 1
+                          ? ' | '
+                          : ''
+                        : item.alignment?.length &&
+                          item.alignment.length > aIdx + 1
+                        ? ' | '
+                        : ''}{' '}
                     </span>
-                  );
-                })}
+                  ),
+                )}
+              </div>
+              {showAlt && (
+                <div className="italic text-orange-700">{item.alt}</div>
+              )}
+              <div className="bsb-ner flex flex-row gap-2">
+                {
+                  // add a tiny red badge if ner is present and len > 0,
+                  item.bsb.ner && item.bsb.ner.length > 0 && (
+                    <span className="text-gray-100 px-1 rounded-l bg-red-500">
+                      concepts:
+                    </span>
+                  )
+                }
+                {item.vref === activeVerse?.vref &&
+                  item.bsb.ner?.map((ner: NamedEntity, nerIdx: number) => {
+                    //   const color: string = colors_for_labels[ner.label];
+                    return (
+                      <span
+                        key={nerIdx}
+                        className={`text-gray-100 px-1 rounded bg-purple-300`}
+                      >
+                        {ner.name} {ner.label}
+                      </span>
+                    );
+                  })}
+              </div>
+              <div className="bsb">
+                <span className="text-gray-900 font-bold">English Bible: </span>
+                <Highlighter
+                  highlightClassName="highlight bg-yellow-300"
+                  searchWords={[bsbTextToSearch || '']}
+                  autoEscape={true}
+                  textToHighlight={item.bsb.content}
+                />
+              </div>
+              <div className="macula">
+                <span className="text-gray-900 font-bold">
+                  Source Language:{' '}
+                </span>{' '}
+                <Highlighter
+                  highlightClassName="highlight bg-yellow-300"
+                  searchWords={[maculaTextToSearch || '']}
+                  autoEscape={true}
+                  textToHighlight={item.macula.content}
+                />
+              </div>
+              <div className="target">
+                <span className="text-gray-900 font-bold">
+                  Target Language:{' '}
+                </span>
+                <Highlighter
+                  highlightClassName="highlight bg-yellow-300"
+                  searchWords={[targetTextToSearch || '']}
+                  autoEscape={true}
+                  textToHighlight={item.target.content}
+                />
+              </div>
             </div>
-            <div className="bsb">
-              <span className="text-gray-900 font-bold">English Bible: </span>
-              <Highlighter
-                highlightClassName="highlight bg-yellow-300"
-                searchWords={[
-                  activePhrase?.['English phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Macula phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Target phrase']?.['original-text-value'] ||
-                    '',
-                ]}
-                autoEscape={true}
-                textToHighlight={item.bsb.content}
-              />
-            </div>
-            <div className="macula">
-              <span className="text-gray-900 font-bold">Source Language: </span>{' '}
-              <Highlighter
-                highlightClassName="highlight bg-yellow-300"
-                searchWords={[
-                  activePhrase?.['English phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Macula phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Target phrase']?.['original-text-value'] ||
-                    '',
-                ]}
-                autoEscape={true}
-                textToHighlight={item.macula.content}
-              />
-            </div>
-            <div className="target">
-              <span className="text-gray-900 font-bold">Target Language: </span>
-              <Highlighter
-                highlightClassName="highlight bg-yellow-300"
-                searchWords={[
-                  activePhrase?.['English phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Macula phrase']?.['original-text-value'] ||
-                    '',
-                  activePhrase?.['Target phrase']?.['original-text-value'] ||
-                    '',
-                ]}
-                autoEscape={true}
-                textToHighlight={item.target.content}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="px-4 bg-white fixed right-0 w-1/4 overflow-scroll">
         <Sidebar
