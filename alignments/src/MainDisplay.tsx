@@ -107,13 +107,9 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
   const [selectedTokenIds, setSelectedTokenIds] = useState<string[]>([]);
   const [showAlt, setShowAlt] = useState(false);
 
-  const [maculaTextToSearch, setMaculaTextToSearch] = useState<
-    string | undefined
-  >();
-  const [targetTextToSearch, setTargetTextToSearch] = useState<
-    string | undefined
-  >();
-  const [bsbTextToSearch, setBsbTextToSearch] = useState<string | undefined>();
+  const [maculaTextToSearch, setMaculaTextToSearch] = useState<string>();
+  const [targetTextToSearch, setTargetTextToSearch] = useState<string>();
+  const [bsbTextToSearch, setBsbTextToSearch] = useState<string>();
 
   // console.log(props.multimediaManifest);
 
@@ -133,6 +129,9 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
 
     console.log({ alignment });
 
+    if (!alignment) {
+      return;
+    }
     // Get Macula ranges
     const maculaRanges = alignment?.['Macula phrase']?.ranges;
     const maculaStartPosition = maculaRanges && maculaRanges[0].startPosition;
@@ -166,15 +165,15 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     // Set the textToSearch state variables
     if (maculaTextToSearch) {
       console.log({ maculaTextToSearch });
-      setMaculaTextToSearch(maculaTextToSearch);
+      maculaTextToSearch ? setMaculaTextToSearch(maculaTextToSearch) : null;
     }
     if (targetTextToSearch) {
       console.log({ targetTextToSearch });
-      setTargetTextToSearch(targetTextToSearch);
+      targetTextToSearch ? setTargetTextToSearch(targetTextToSearch) : null;
     }
     if (bsbTextToSearch) {
       console.log({ bsbTextToSearch });
-      setBsbTextToSearch(bsbTextToSearch);
+      bsbTextToSearch ? setBsbTextToSearch(bsbTextToSearch) : null;
     }
   };
 
@@ -451,7 +450,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                 <span className="text-gray-900 font-bold">English Bible: </span>
                 <Highlighter
                   highlightClassName="highlight bg-yellow-300"
-                  searchWords={[bsbTextToSearch || '']}
+                  searchWords={[bsbTextToSearch || 'NO MATCH TO FIND']}
                   autoEscape={true}
                   textToHighlight={item.bsb.content}
                 />
@@ -462,7 +461,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                 </span>{' '}
                 <Highlighter
                   highlightClassName="highlight bg-yellow-300"
-                  searchWords={[maculaTextToSearch || '']}
+                  searchWords={[maculaTextToSearch || 'NO MATCH TO FIND']}
                   autoEscape={true}
                   textToHighlight={item.macula.content}
                 />
@@ -473,7 +472,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                 </span>
                 <Highlighter
                   highlightClassName="highlight bg-yellow-300"
-                  searchWords={[targetTextToSearch || '']}
+                  searchWords={[targetTextToSearch || 'NO MATCH TO FIND']}
                   autoEscape={true}
                   textToHighlight={item.target.content}
                 />
