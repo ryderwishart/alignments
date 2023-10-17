@@ -350,7 +350,7 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
               onMouseLeave={() => handleVerseHover(null)}
             >
               <span>{item.vref}</span>
-              <div className="macula">
+              <div className="macula flex flex-row gap-2">
                 {(item.alignment || item.alignments)?.map(
                   (alignment: Alignment, aIdx: number) => (
                     <span
@@ -358,31 +358,66 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
                       onMouseEnter={() => handlePhraseHover(alignment)}
                       onMouseLeave={() => handlePhraseHover(null)}
                       onClick={() => handlePhraseClick(item, alignment)}
-                      className="cursor-pointer text-blue-600 hover:text-blue-800"
+                      className="cursor-pointer text-blue-600 hover:text-blue-800 items-center px-2.5 py-0.5 rounded text-xs bg-blue-100 text-blue-800 flex"
                     >
-                      Translation unit {aIdx + 1}
-                      {item.alignments
-                        ? item.alignments?.length &&
-                          item.alignments.length > aIdx + 1
-                          ? ' | '
-                          : ''
-                        : item.alignment?.length &&
-                          item.alignment.length > aIdx + 1
-                        ? ' | '
-                        : ''}{' '}
                       {
-                      /**  */
-                      /* <div className="flex flex-column gap-2 border-b">
-                        <div>{JSON.stringify(alignment['English phrase'])}</div>
-                        <div>
-                          {JSON.stringify(
-                            alignment['Macula phrase']
-                              ? alignment['Macula phrase']
-                              : '',
-                          )}
-                        </div>
-                        <div>{JSON.stringify(alignment['Target phrase'])}</div>
-                      </div> */}
+                        /** Toggleable dropdown for raw data view */
+                        <details className="flex flex-row gap-2 border-b text-blue-600">
+                          <summary />
+                          <div className="bg-white p-2 rounded">
+                            <div className="border rounded m-2 p-2">
+                              <strong>English Phrase:</strong>
+                              <div className="text-orange-700">
+                                {
+                                  alignment['English phrase'][
+                                    'original-text-value'
+                                  ]
+                                }
+                              </div>
+                              <div>
+                                Ranges:{' '}
+                                {JSON.stringify(
+                                  alignment['English phrase'].ranges,
+                                )}
+                              </div>
+                            </div>
+                            <div className="border rounded m-2 p-2">
+                              <strong>Macula Phrase:</strong>
+                              <div className="text-orange-700">
+                                {alignment['Macula phrase'] &&
+                                  alignment['Macula phrase'][
+                                    'original-text-value'
+                                  ]}
+                              </div>
+                              <div>
+                                Ranges:{' '}
+                                {alignment['Macula phrase']
+                                  ? JSON.stringify(
+                                      alignment['Macula phrase'].ranges,
+                                    )
+                                  : ''}
+                              </div>
+                            </div>
+                            <div className="border rounded m-2 p-2">
+                              <strong>Target Phrase:</strong>
+                              <div className="text-orange-700">
+                                {
+                                  alignment['Target phrase'][
+                                    'original-text-value'
+                                  ]
+                                }
+                              </div>
+                              <div>
+                                Ranges:{' '}
+                                {JSON.stringify(
+                                  alignment['Target phrase'].ranges,
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </details>
+                      }
+                      Translation unit {aIdx + 1}
                     </span>
                   ),
                 )}
