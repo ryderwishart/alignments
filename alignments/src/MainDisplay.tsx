@@ -163,16 +163,16 @@ const MainDisplay: React.FC<MainDisplayProps> = (props) => {
     );
 
     // Set the textToSearch state variables
-    if (maculaTextToSearch) {
-      console.log({ maculaTextToSearch });
+    console.log('setting maculaTextToSearch to', { maculaTextToSearch });
+    if (maculaTextToSearch?.length) {
       maculaTextToSearch ? setMaculaTextToSearch(maculaTextToSearch) : null;
     }
-    if (targetTextToSearch) {
-      console.log({ targetTextToSearch });
+    console.log('setting targetTextToSearch to', { targetTextToSearch });
+    if (targetTextToSearch?.length) {
       targetTextToSearch ? setTargetTextToSearch(targetTextToSearch) : null;
     }
-    if (bsbTextToSearch) {
-      console.log({ bsbTextToSearch });
+    console.log('setting bsbTextToSearch to', { bsbTextToSearch });
+    if (bsbTextToSearch?.length) {
       bsbTextToSearch ? setBsbTextToSearch(bsbTextToSearch) : null;
     }
   };
